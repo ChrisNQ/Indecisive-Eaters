@@ -1,59 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
     <title>Indecisive Eaters</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
     <style type="text/css">
-        #map-canvas {
-            height: 500px
+        #map {
+            height: 400px;
+            width: 500px;
+        }
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARdEdTL2gWxhwX3uL4u8NcpozxxjIuLpI&libraries=places&callback=initMap">
-    </script>
-
-    <script type="text/javascript">
-
-        var map;
-
-        function initialise(location)
-        {
-            console.log(location);
-
-            var currentLocation = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
-
-            var mapOptions = {
-                center: currentLocation,
-                zoom: 12,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            };
-
-            map = new google.maps.Map(document.getElementByID("map-canvas"), mapOptions);
-
-            var marker = new google.maps.Marker({
-                position: currentLocation,
-                map: map
-            });
-
-        }
-
-        $(document).ready(function()
-        {
-            navigator.geolocation.getCurrentPosition(initialise);
-        });
-    </script>
 </head>
 <body>
     <a href="{% url 'login:logout' %}">Logout</a>
     <h1>Indecisive Eaters</h1>
     <label>Can't figure what you want to eat? Say no more...</label>
-    <div id="map-canvas"></div>
-    <!--   AIzaSyARdEdTL2gWxhwX3uL4u8NcpozxxjIuLpI -->
-    <!-- https://maps.googleapis.com/maps/api/directions/json?origin=75+9th+Ave+New+York,+NY&destination=MetLife+Stadium+1+MetLife+Stadium+Dr+East+Rutherford,+NJ+07073&key=AIzaSyARdEdTL2gWxhwX3uL4u8NcpozxxjIuLpI -->
+    <div id="map">
+    <script>
+      function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 6
+        });
+        var infoWindow = new google.maps.InfoWindow({map: map});
+
+        // Try HTML5 geolocation.
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+
+            infoWindow.setPosition(pos);
+            infoWindow.setContent('Location found.');
+            map.setCenter(pos);
+          }, function() {
+            handleLocationError(true, infoWindow, map.getCenter());
+          });
+        } else {
+          // Browser doesn't support Geolocation
+          handleLocationError(false, infoWindow, map.getCenter());
+        }
+      }
+
+      function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+        infoWindow.setPosition(pos);
+        infoWindow.setContent(browserHasGeolocation ?
+                              'Error: The Geolocation service failed.' :
+                              'Error: Your browser doesn\'t support geolocation.');
+      }
+    </script>
+    </div>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDAksDEr0pJv7LT3iwnjg8GFK_GU23Ux4I&callback=initMap">
+    </script>
     <form class="" action="" method="post">
         {% csrf_token %}
         <input type="submit" name="Random" value="Random Generator"> <input type="submit" name="Favorites" value="Favorites">
