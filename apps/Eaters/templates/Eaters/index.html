@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
     <style type="text/css">
         #map {
-            height: 400px;
-            width: 500px;
+            height: 50%;
+            width: 50%;
         }
         html, body {
           height: 100%;
@@ -17,17 +17,13 @@
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-</head>
-<body>
-    <a href="{% url 'login:logout' %}">Logout</a>
-    <h1>Indecisive Eaters</h1>
-    <label>Can't figure what you want to eat? Say no more...</label>
-    <div id="map">
-    <script>
-      function initMap() {
-        var map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: -34.397, lng: 150.644},
-          zoom: 6
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARdEdTL2gWxhwX3uL4u8NcpozxxjIuLpI&libraries=places&callback=initMap"></script>
+    <script type="text/javascript">
+      function initialize(){
+        var map;
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 47.609367, lng: -122.201542},
+          zoom: 12
         });
         var infoWindow = new google.maps.InfoWindow({map: map});
 
@@ -42,10 +38,14 @@
             infoWindow.setPosition(pos);
             infoWindow.setContent('Location found.');
             map.setCenter(pos);
-          }, function() {
+          },
+
+          function() {
             handleLocationError(true, infoWindow, map.getCenter());
           });
-        } else {
+        }
+
+        else {
           // Browser doesn't support Geolocation
           handleLocationError(false, infoWindow, map.getCenter());
         }
@@ -54,14 +54,17 @@
       function handleLocationError(browserHasGeolocation, infoWindow, pos) {
         infoWindow.setPosition(pos);
         infoWindow.setContent(browserHasGeolocation ?
-                              'Error: The Geolocation service failed.' :
-                              'Error: Your browser doesn\'t support geolocation.');
+                            'Error: The Geolocation service failed.' :
+                            'Error: Your browser doesn\'t support geolocation.');
       }
+      google.maps.event.addDomListener(window, 'load', initialize);
     </script>
-    </div>
-    <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDAksDEr0pJv7LT3iwnjg8GFK_GU23Ux4I&callback=initMap">
-    </script>
+</head>
+<body>
+    <a href="{% url 'login:logout' %}">Logout</a>
+    <h1>Indecisive Eaters</h1>
+    <label>Can't figure what you want to eat? Say no more...</label>
+    <div id="map"></div>
     <form class="" action="" method="post">
         {% csrf_token %}
         <input type="submit" name="Random" value="Random Generator"> <input type="submit" name="Favorites" value="Favorites">
