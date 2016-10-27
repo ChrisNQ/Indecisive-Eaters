@@ -40,12 +40,6 @@ def print_messages(request, message_list):
     for message in message_list:
         messages.add_message(request, messages.INFO, message)
 
-def success(request):
-    # Check if the current user is in session. If not, redirect to the main page
-    if not 'user' in request.session:
-        return redirect('/')
-    # Otherwise, send them to the success page
-    return render(request, 'loginreg/success.html')
 
 def logout(request):
     # Knock the current user out of session
