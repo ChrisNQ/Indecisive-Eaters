@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
     <style type="text/css">
         #map {
-            height: 400px;
-            width: 500px;
+            height: 50%;
+            width: 50%;
         }
         html, body {
           height: 100%;
@@ -17,40 +17,59 @@
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDAksDEr0pJv7LT3iwnjg8GFK_GU23Ux4I&callback=initMap">
-    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAC7hoqTltP1b-i3FEjacejkPn081QFbQ&libraries=places&callback=initMap"></script>
     <script>
+      var map;
+      var infoWindow;
       function initMap() {
-        var map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: -34.397, lng: 150.644},
-          zoom: 12
-        });
-        var infoWindow = new google.maps.InfoWindow({map: map});
-        // Try HTML5 geolocation.
+        infoWindow = new google.maps.InfoWindow();
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(function(position) {
-            var pos = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            };
-            infoWindow.setPosition(pos);
-            infoWindow.setContent('Location found.');
-            map.setCenter(pos);
-          }, function() {
+            map = new google.maps.Map(document.getElementById('map'), {
+              center: {lat: position.coords.latitude, lng: position.coords.longitude},
+              zoom: 15
+            });
+
+            var service = new google.maps.places.PlacesService(map);
+            service.nearbySearch({
+              location: map.center,
+              radius: 1600,
+              type: ['restaurant']
+            },callback);
+          },
+          function() {
             handleLocationError(true, infoWindow, map.getCenter());
           });
-        } else {
-          // Browser doesn't support Geolocation
+        }
+        else {
+          map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: 47.610141, lng: -122.196575},
+            zoom: 15
+          });
           handleLocationError(false, infoWindow, map.getCenter());
         }
       }
-      function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-        infoWindow.setPosition(pos);
-        infoWindow.setContent(browserHasGeolocation ?
-                              'Error: The Geolocation service failed.' :
-                              'Error: Your browser doesn\'t support geolocation.');
+
+    function callback(results, status) {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        for (var i = 0; i < results.length; i++) {
+          createMarker(results[i]);
+        }
       }
+    }
+
+    function createMarker(place) {
+      var placeLoc = place.geometry.location;
+      var marker = new google.maps.Marker({
+        map: map,
+        position: place.geometry.location
+      });
+
+      google.maps.event.addListener(marker, 'click', function() {
+        infoWindow.setContent(place.name + ": " + place.vicinity);
+        infoWindow.open(map, this);
+      });
+    }
     </script>
 </head>
 <body>
@@ -64,18 +83,6 @@
     <form class="" action="" method="post">
         {% csrf_token %}
         <input type="submit" name="Random" value="Random Generator">
-    </form>
-
-    <form action="{% url 'Eaters:add' %}" method="post">
-        {% csrf_token %}
-        Restaurant: <input type="text" name="name">
-        Address: <input type="text" name="address">
-        <input type="submit" value="Temp Rest">
-    </form>
-
-    <form action="{% url 'Eaters:favorites' %}" method="get">
-        {% csrf_token %}
-        <input type="submit" value="Favorites">
     </form>
 </body>
 </html>
